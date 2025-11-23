@@ -1,6 +1,6 @@
 # Playwright MCP Framework
 
-A comprehensive Playwright TypeScript framework with modular architecture for scalable UI automation testing.
+A comprehensive Playwright TypeScript framework with modular architecture for scalable UI and API automation testing.
 
 ## 🏗️ Architecture
 
@@ -8,43 +8,64 @@ The framework follows a modular layout designed for scalability, clarity, and ma
 
 ```
 playwright-mcp-framework/
-├── tests/                    # UI test cases
+├── tests/                    # UI and API test cases
 │   ├── example.spec.ts      # Basic UI test examples
 │   ├── auth.spec.ts         # Authentication workflow tests
-│   └── workflow.spec.ts     # Workflow interaction tests
+│   ├── workflow.spec.ts     # Workflow interaction tests
+│   ├── api.spec.ts          # API testing examples
+│   ├── framework.spec.ts    # Framework verification tests
+│   └── complete-demo.spec.ts # Complete demo tests
 ├── testcontexts/            # Reusable test contexts
 │   ├── setup.context.ts     # Setup and teardown utilities
 │   ├── auth.context.ts      # Authentication helpers
 │   ├── workflow.context.ts  # Common workflow utilities
+│   ├── api.context.ts       # API testing utilities
 │   └── index.ts             # Context exports
+├── .github/workflows/       # CI/CD workflows
+│   └── playwright.yml       # GitHub Actions workflow
 ├── playwright.config.ts     # Playwright configuration
 ├── tsconfig.json           # TypeScript configuration
+├── Dockerfile              # Docker containerization
+├── docker-compose.yml      # Docker Compose setup
 └── package.json            # Project dependencies
 ```
 
 ## 🎯 Key Features
 
 ### 1. **Test Organization** (`tests/`)
-- Contains all UI test cases organized by feature/module
-- Uses Playwright's test runner with TypeScript
+- UI test cases organized by feature/module
+- API testing with RESTful capabilities
+- Framework verification tests
 - Supports parallel execution and test isolation
 
 ### 2. **Reusable Test Contexts** (`testcontexts/`)
 - **SetupContext**: Handles test initialization, navigation, and cleanup
 - **AuthContext**: Manages authentication workflows (login, logout, session handling)
 - **WorkflowContext**: Provides common UI interaction utilities (forms, elements, waits)
+- **APIContext**: RESTful API testing with request/response validation
 
 ### 3. **Configuration** (`playwright.config.ts`)
 - **Browser Support**: Chromium, Firefox, WebKit, Mobile Chrome, Mobile Safari
-- **Reporters**: HTML, JSON, JUnit, and List reporters
+- **Reporters**: HTML, JSON, JUnit, Allure, and List reporters
 - **Retries**: Automatic retry on CI environments
 - **Artifacts**: Auto-generated screenshots, videos, and traces on failures
 
-### 4. **Artifact Generation**
-- **Screenshots**: Captured on test failures
-- **Videos**: Recorded and retained on failures
-- **Traces**: Generated on first retry for debugging
-- **Reports**: HTML reports with detailed test results
+### 4. **CI/CD Integration**
+- **GitHub Actions**: Automated test execution on push/PR
+- **Notifications**: Slack and email notifications for test results
+- **Matrix Testing**: Parallel execution across multiple browsers
+- **Artifact Upload**: Automatic upload of test reports and results
+
+### 5. **Docker Support**
+- **Containerization**: Run tests in isolated Docker containers
+- **Docker Compose**: Easy setup with multi-container configuration
+- **Consistent Environment**: Same test environment across all platforms
+
+### 6. **Advanced Reporting**
+- **Allure Reports**: Rich, interactive test reports with history
+- **Multiple Formats**: HTML, JSON, JUnit for different needs
+- **Screenshots & Videos**: Visual evidence of test execution
+- **Test Trends**: Historical data and trend analysis
 
 ## 🚀 Getting Started
 
@@ -186,6 +207,94 @@ Provides UI interaction utilities:
 - `waitForAPIResponse(url)`: Wait for API responses
 - `mockAPIRequest(url, data)`: Mock API requests
 
+### APIContext
+REST API testing utilities:
+- `get(endpoint, options)`: Make GET requests
+- `post(endpoint, data, options)`: Make POST requests
+- `put(endpoint, data, options)`: Make PUT requests
+- `patch(endpoint, data, options)`: Make PATCH requests
+- `delete(endpoint, options)`: Make DELETE requests
+- `setAuthToken(token)`: Set authentication token
+- `verifyStatus(response, code)`: Verify response status
+- `verifyResponseContains(response, data)`: Verify response data
+
+## 🐳 Docker Support
+
+Run tests in containers for consistent environments:
+
+```bash
+# Using docker-run.sh script
+./docker-run.sh
+
+# Using Docker directly
+docker build -t playwright-framework .
+docker run --rm -v "$(pwd)/test-results:/app/test-results" playwright-framework npm test
+
+# Using Docker Compose
+docker-compose up
+```
+
+See [DOCKER.md](DOCKER.md) for complete Docker documentation.
+
+## 🔔 Notifications
+
+Get automated test result notifications:
+
+### Slack Notifications
+Configure Slack webhook in GitHub repository secrets:
+```
+SLACK_WEBHOOK_URL: Your Slack webhook URL
+```
+
+### Email Notifications
+Configure email settings in GitHub secrets:
+```
+EMAIL_SERVER, EMAIL_PORT, EMAIL_USERNAME, EMAIL_PASSWORD, EMAIL_TO
+```
+
+See [NOTIFICATIONS.md](NOTIFICATIONS.md) for setup instructions.
+
+## 📊 API Testing
+
+Full REST API testing support:
+
+```typescript
+import { test } from '@playwright/test';
+import { APIContext } from '../testcontexts';
+
+test('API test', async ({ request }) => {
+  const api = new APIContext(request, 'https://api.example.com');
+  const response = await api.get('/users/1');
+  await api.verifyStatus(response, 200);
+});
+```
+
+Run API tests:
+```bash
+npm run test:api
+```
+
+See [API_TESTING.md](API_TESTING.md) for complete API testing guide.
+
+## 📈 Allure Reporting
+
+Generate rich, interactive Allure reports:
+
+```bash
+# Run tests and generate Allure report
+npm test
+npm run report:allure
+```
+
+Allure provides:
+- Interactive test results
+- Historical trends
+- Test execution timeline
+- Failure categorization
+- Screenshots and videos
+
+See [ALLURE.md](ALLURE.md) for Allure setup and usage.
+
 ## 🎨 Best Practices
 
 1. **Use Test Contexts**: Leverage reusable contexts instead of repeating code
@@ -195,36 +304,33 @@ Provides UI interaction utilities:
 5. **Wait Properly**: Use explicit waits instead of hardcoded delays
 6. **Assertions**: Include meaningful assertion messages
 7. **Artifacts**: Let framework auto-generate artifacts on failures
+8. **API + UI**: Combine API and UI tests for comprehensive coverage
 
 ## 🔒 CI/CD Integration
 
-The framework is CI-ready with:
-- Automatic retry on failures
-- Optimized parallel execution
-- Multiple report formats (HTML, JSON, JUnit)
-- Artifact retention for debugging
+The framework includes a complete GitHub Actions workflow with:
+- Multi-browser parallel execution
+- Automatic test retries
+- Artifact upload (reports, screenshots, videos)
+- Slack and email notifications
+- Multiple report formats
 
-Example GitHub Actions workflow:
-```yaml
-- name: Install dependencies
-  run: npm ci
-- name: Install Playwright
-  run: npx playwright install --with-deps
-- name: Run tests
-  run: npm test
-- name: Upload artifacts
-  uses: actions/upload-artifact@v3
-  if: always()
-  with:
-    name: playwright-report
-    path: playwright-report/
-```
+The workflow is automatically triggered on:
+- Push to main/master/develop branches
+- Pull requests
+- Manual workflow dispatch
 
-## 📚 Resources
+See `.github/workflows/playwright.yml` for the complete workflow configuration.
 
+## 📚 Documentation
+
+- [Quick Start Guide](QUICK_START.md) - Get started quickly
+- [Docker Setup](DOCKER.md) - Containerization guide
+- [API Testing](API_TESTING.md) - REST API testing
+- [Allure Reports](ALLURE.md) - Advanced reporting
+- [Notifications](NOTIFICATIONS.md) - Slack/Email setup
 - [Playwright Documentation](https://playwright.dev)
 - [TypeScript Documentation](https://www.typescriptlang.org/docs/)
-- [Test Best Practices](https://playwright.dev/docs/best-practices)
 
 ## 🤝 Contributing
 

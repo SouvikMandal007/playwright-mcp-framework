@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  playwright-tests:
+    build: .
+    container_name: playwright-framework
+    volumes:
+      - ./test-results:/app/test-results
+      - ./playwright-report:/app/playwright-report
+      - ./screenshots:/app/screenshots
+    environment:
+      - CI=true
+      - BASE_URL=${BASE_URL:-http://localhost:3000}
+    command: npm test
+
+  # Optional: Add a web server to view reports
+  report-server:
+    image: nginx:alpine
+    container_name: playwright-reports
+    ports:
+      - "8080:80"
+    volumes:
+      - ./playwright-report:/usr/share/nginx/html:ro
+    depends_on:
+      - playwright-tests
