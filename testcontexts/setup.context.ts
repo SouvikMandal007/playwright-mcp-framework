@@ -7,6 +7,7 @@ import { Page, Browser, BrowserContext } from '@playwright/test';
 export class SetupContext {
   private page: Page;
   private context: BrowserContext;
+  private readonly SCREENSHOTS_DIR = 'test-results/screenshots';
 
   constructor(page: Page, context: BrowserContext) {
     this.page = page;
@@ -59,7 +60,7 @@ export class SetupContext {
    */
   async takeScreenshot(name: string): Promise<Buffer> {
     return await this.page.screenshot({ 
-      path: `screenshots/${name}.png`,
+      path: `${this.SCREENSHOTS_DIR}/${name}.png`,
       fullPage: true 
     });
   }

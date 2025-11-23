@@ -7,6 +7,7 @@ import { Page, BrowserContext } from '@playwright/test';
 export class AuthContext {
   private page: Page;
   private context: BrowserContext;
+  private readonly DEFAULT_POPUP_TIMEOUT = 5000;
 
   constructor(page: Page, context: BrowserContext) {
     this.page = page;
@@ -83,12 +84,13 @@ export class AuthContext {
   /**
    * Login with OAuth/Social provider
    */
-  async loginWithOAuth(provider: string, credentials: { username: string; password: string }): Promise<void> {
+  async loginWithOAuth(provider: string, credentials: { username: string; password: string }, popupTimeout?: number): Promise<void> {
     // Click OAuth button
     await this.page.click(`button:has-text("${provider}"), a:has-text("${provider}")`);
     
     // Wait for OAuth popup or redirect
-    const popup = await this.page.waitForEvent('popup', { timeout: 5000 }).catch(() => null);
+    const timeout = popupTimeout || this.DEFAULT_POPUP_TIMEOUT;
+    const popup = await this.page.waitForEvent('popup', { timeout }).catch(() => null);
     
     if (popup) {
       // Handle popup-based OAuth

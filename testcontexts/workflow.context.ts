@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, FrameLocator } from '@playwright/test';
 
 /**
  * Workflow context for common UI interactions and workflows
@@ -125,11 +125,10 @@ export class WorkflowContext {
   }
 
   /**
-   * Switch to iframe
+   * Switch to iframe and get frame locator
    */
-  async switchToIframe(selector: string): Promise<Page> {
-    const frame = this.page.frameLocator(selector);
-    return frame as unknown as Page;
+  async getFrameLocator(selector: string) {
+    return this.page.frameLocator(selector);
   }
 
   /**
